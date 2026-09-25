@@ -2,12 +2,44 @@
   {
     "name": "week",
     "title": "This week",
-    "subtitle": "Home Care for Claude Code: what needs attention, rendered by npm run view",
+    "subtitle": "Home Care for Claude Code: the roster and everything that wants a decision, rendered by npm run view",
     "sections": [
       {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "title": "Needs a decision",
+        "note": "Worst first. An unreported reportable incident outranks everything.",
+        "sql": "select reason as why, label as record, client, place as where_, days, detail from v_attention order by rank, days desc nulls last"
+      },
+      {
+        "title": "The week ahead",
+        "note": "Every rostered shift for the next seven days.",
+        "sql": "select ref, to_char(shift_on, 'Dy DD Mon') as day, to_char(starts_at, 'HH24:MI') as start, to_char(ends_at, 'HH24:MI') as finish, client, worker, support, state from v_shifts where shift_on between current_date and current_date + 7 and status = 'scheduled' order by shift_on, starts_at"
+      },
+      {
+        "title": "The team on deck",
+        "note": "Clearance state loud. EXPIRED or NONE means they do not roster.",
+        "sql": "select name, role, screening, to_char(screening_expires_on, 'YYYY-MM-DD') as screening_expires, first_aid, shifts_next_7d, round(minutes_next_7d / 60.0, 1) as hours_next_7d from v_workers where status = 'active' order by name"
+      }
+    ]
+  },
+  {
+    "name": "money",
+    "title": "The money",
+    "subtitle": "Delivered work, payment requests and budget pace, rendered by npm run view",
+    "sections": [
+      {
+        "title": "Delivered, not yet claimed",
+        "note": "Completed, noted supports (and claimable short-notice cancellations) with no payment request. Build one: claim build.",
+        "sql": "select ref as shift, to_char(shift_on, 'YYYY-MM-DD') as date, client, support, round(minutes / 60.0, 2) as hours, round(value_cents / 100.0, 2) as value_aud, days_waiting from v_unclaimed order by shift_on"
+      },
+      {
+        "title": "Payment requests in flight",
+        "note": "Everything claimed and not yet paid. REJECTED rows are money until resubmitted.",
+        "sql": "select ref as claim, batch_ref as batch, client, to_char(shift_on, 'YYYY-MM-DD') as support_date, round(amount_cents / 100.0, 2) as amount_aud, to_char(claimed_on, 'YYYY-MM-DD') as claimed, state, rejected_reason from v_claims where status <> 'paid' order by claimed_on desc"
+      },
+      {
+        "title": "Agreements: budget against pace",
+        "note": "used% far below time% is money the plan review will take back.",
+        "sql": "select ref, client, support, round(rate_cents / 100.0, 2) as rate_aud, round(used_cents / 100.0, 2) as used_aud, round(budget_cents / 100.0, 2) as budget_aud, used_pct, elapsed_pct as time_pct, to_char(ends_on, 'YYYY-MM-DD') as ends, state from v_agreements where status = 'active' order by ref"
       }
     ]
   }

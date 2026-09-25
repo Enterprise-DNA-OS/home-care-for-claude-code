@@ -10,3 +10,4 @@ drafts/*
 Thumbs.db
 views/*.html
 docs-out/
+exports/

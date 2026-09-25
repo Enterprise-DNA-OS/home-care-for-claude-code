@@ -1,11 +1,66 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "client-statement",
+    "title": "Statement of supports delivered",
+    "for_each": "select id, name from clients where status = 'active' and exists (select 1 from shifts sh where sh.client_id = clients.id and sh.status = 'completed') order by name",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      {
+        "title": "Client",
+        "sql": "select name, ndis_number, funding, plan_manager, to_char(plan_ends_on, 'YYYY-MM-DD') as plan_ends from clients where id = $1"
+      },
+      {
+        "title": "Service agreements",
+        "sql": "select ref, support, round(rate_cents / 100.0, 2) as rate_aud, hours_per_week, round(budget_cents / 100.0, 2) as budget_aud, round(used_cents / 100.0, 2) as used_aud, to_char(starts_on, 'YYYY-MM-DD') as starts, to_char(ends_on, 'YYYY-MM-DD') as ends from v_agreements where client_id = $1 order by ref"
+      },
+      {
+        "title": "Supports delivered, last 60 days",
+        "sql": "select ref as shift, to_char(shift_on, 'YYYY-MM-DD') as date, worker, support, round(coalesce(completed_minutes, scheduled_minutes) / 60.0, 2) as hours, round(value_cents / 100.0, 2) as value_aud, state from v_shifts where client_id = $1 and status = 'completed' and shift_on >= current_date - 60 order by shift_on"
+      },
+      {
+        "title": "Payment requests",
+        "sql": "select ref as claim, batch_ref as batch, to_char(shift_on, 'YYYY-MM-DD') as support_date, round(amount_cents / 100.0, 2) as amount_aud, state from v_claims where claim_id in (select cl.id from claims cl where cl.client_id = $1) order by claimed_on desc"
+      }
+    ]
+  },
+  {
+    "name": "incident-report",
+    "title": "Incident report",
+    "for_each": "select i.id, i.ref || ' ' || c.name as name from incidents i join clients c on c.id = i.client_id order by i.ref",
+    "file": "name",
+    "sections": [
+      {
+        "title": "The incident",
+        "sql": "select ref, to_char(occurred_on, 'YYYY-MM-DD') as occurred, category, severity, case when reportable then 'YES' else 'no' end as reportable, description from v_incidents where incident_id = $1"
+      },
+      {
+        "title": "People",
+        "sql": "select c.name as client, c.ndis_number, w.name as worker_present from incidents i join clients c on c.id = i.client_id left join workers w on w.id = i.worker_id where i.id = $1"
+      },
+      {
+        "title": "Notification and closure",
+        "sql": "select case when reportable then case when notified_on is null then 'NOT YET NOTIFIED' else to_char(notified_on, 'YYYY-MM-DD') end else 'not reportable' end as commission_notified, status, to_char(closed_on, 'YYYY-MM-DD') as closed from incidents where id = $1"
+      }
+    ]
+  },
+  {
+    "name": "worker-file",
+    "title": "Worker file",
+    "for_each": "select id, name from workers where status = 'active' order by name",
+    "file": "name",
+    "sections": [
+      {
+        "title": "Profile and clearances",
+        "sql": "select name, role, employment, phone, email, screening_number, to_char(screening_expires_on, 'YYYY-MM-DD') as screening_expires, screening as screening_state, to_char(first_aid_expires_on, 'YYYY-MM-DD') as first_aid_expires, first_aid as first_aid_state from v_workers where worker_id = $1"
+      },
+      {
+        "title": "Shifts, last 28 days",
+        "sql": "select ref, to_char(shift_on, 'YYYY-MM-DD') as date, client, support, round(coalesce(completed_minutes, scheduled_minutes) / 60.0, 2) as hours, state from v_shifts where worker_id = $1 and shift_on >= current_date - 28 order by shift_on"
+      },
+      {
+        "title": "Upcoming roster",
+        "sql": "select ref, to_char(shift_on, 'YYYY-MM-DD') as date, to_char(starts_at, 'HH24:MI') as start, client, support from v_shifts where worker_id = $1 and status = 'scheduled' and shift_on >= current_date order by shift_on, starts_at"
+      }
     ]
   }
 ]
