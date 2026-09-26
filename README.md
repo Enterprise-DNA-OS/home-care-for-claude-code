@@ -11,8 +11,8 @@
 <table align="center">
   <tr>
     <td align="center"><strong>Do it yourself</strong><br/>Clone it, run it, own it. Free, MIT.<br/><a href="#quick-start">Quick start</a></td>
-    <td align="center"><strong>We customise it</strong><br/>Your fields, your rules, a web front end if you want one, your ShiftCare data brought across.<br/><a href="https://calendly.com/sam-mckay/discovery-call">Book a call</a></td>
-    <td align="center"><strong>We run it for you</strong><br/>Installed, connected and operated inside Omni. Setup fee, then a retainer.<br/><a href="https://enterprisedna.co/omni/instead-of/shiftcare">How it works</a></td>
+    <td align="center"><strong>We customise it</strong><br/>Your fields, your rules, a web front end if you want one, your ShiftCare data brought across.<br/><a href="https://calendly.com/sam-mckay/discovery-call?utm_source=github&utm_medium=readme&utm_campaign=shiftcare">Book a call</a></td>
+    <td align="center"><strong>We run it for you</strong><br/>Installed, connected and operated inside Omni. Setup fee, then a retainer.<br/><a href="https://enterprisedna.co/omni/instead-of/shiftcare?utm_source=github&utm_medium=readme&utm_campaign=shiftcare">How it works</a></td>
   </tr>
 </table>
 
@@ -229,8 +229,8 @@ Issues and pull requests are welcome. Keep the shape: plain SQL, a small CLI, a 
 
 Enterprise DNA installs Home Care for Claude Code for your organisation, migrates your ShiftCare data, writes your registration's rules in as commands, and runs it for you as part of **Omni**, our managed Command Center. One setup fee, then a monthly retainer.
 
-- Book a call: https://calendly.com/sam-mckay/discovery-call
-- Read more: https://enterprisedna.co/omni/instead-of/shiftcare
+- Book a call: https://calendly.com/sam-mckay/discovery-call?utm_source=github&utm_medium=readme&utm_campaign=shiftcare
+- Read more: https://enterprisedna.co/omni/instead-of/shiftcare?utm_source=github&utm_medium=readme&utm_campaign=shiftcare
 
 ## License
 
